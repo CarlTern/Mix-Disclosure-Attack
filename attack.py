@@ -35,22 +35,29 @@ if __name__ == "__main__":
     mixIp = parameters['mixIp']
     numberOfPartners = parameters['nbr']
     capFile = getFile(parameters['path'])
-    # print the packets
-    print ('timestamp\teth src\t\t\teth dst\t\t\tIP src\t\tIP dst')
-    for pkt in capFile.packets:
-        timestamp = pkt.timestamp
+    nazirSent = False
+    sets = []
+    srcList = []
+    dstList = []
+    for index in range(len(capFile.packets)):
+        timestamp = capFile.packets[index].timestamp
         # all data is ASCII encoded (byte arrays). If we want to compare with strings
         # we need to decode the byte arrays into UTF8 coded strings
-        eth_src = pkt.packet.src.decode('UTF8')
-        eth_dst = pkt.packet.dst.decode('UTF8')
-        ip_src = pkt.packet.payload.src.decode('UTF8')
-        ip_dst = pkt.packet.payload.dst.decode('UTF8')
-        if(ip_dst == mixIp):
-            ip_dst = "Mix"
-        if(ip_src == mixIp):
-            ip_src = "Mix"
-        if(ip_dst == nazirIp):
-            ip_dst == "Nazir"
-        if(ip_src == nazirIp):
-            ip_src = "Nazir"    
-        print ('{}\t\t{}\t{}\t{}\t{}'.format(timestamp, eth_src, eth_dst, ip_src, ip_dst))
+        eth_src = capFile.packets[index].packet.src.decode('UTF8')
+        eth_dst = capFile.packets[index].packet.dst.decode('UTF8')
+        ip_src = capFile.packets[index].packet.payload.src.decode('UTF8')
+        ip_dst = capFile.packets[index].packet.payload.dst.decode('UTF8')
+        srcList.append(ip_src)
+        dstList.append(ip_dst)
+        if(index % 12 == 0 and index is not 0):
+            if (nazirSent):
+                sets.append(list(dstList))   
+                nazirSent = False
+            for srcIp in srcList:
+                if (srcIp == nazirIp):
+                    nazirSent = True
+                    break
+            dstList.clear()
+            srcList.clear()
+    for s in sets:
+        print("set:", s)
