@@ -21,9 +21,9 @@ def getParameters():
 
 def getFile(filePath):
     try:
-        file = open(filePath, "rb")
+        testcap = open(filePath, "rb")
         capfile = savefile.load_savefile(testcap, layers=2, verbose=True)
-        file.close()
+        testcap.close()
         return capfile
     except:
         print("Invalid file path")
@@ -35,4 +35,22 @@ if __name__ == "__main__":
     mixIp = parameters['mixIp']
     numberOfPartners = parameters['nbr']
     capFile = getFile(parameters['path'])
-    print("working!")
+    # print the packets
+    print ('timestamp\teth src\t\t\teth dst\t\t\tIP src\t\tIP dst')
+    for pkt in capFile.packets:
+        timestamp = pkt.timestamp
+        # all data is ASCII encoded (byte arrays). If we want to compare with strings
+        # we need to decode the byte arrays into UTF8 coded strings
+        eth_src = pkt.packet.src.decode('UTF8')
+        eth_dst = pkt.packet.dst.decode('UTF8')
+        ip_src = pkt.packet.payload.src.decode('UTF8')
+        ip_dst = pkt.packet.payload.dst.decode('UTF8')
+        if(ip_dst == mixIp):
+            ip_dst = "Mix"
+        if(ip_src == mixIp):
+            ip_src = "Mix"
+        if(ip_dst == nazirIp):
+            ip_dst == "Nazir"
+        if(ip_src == nazirIp):
+            ip_src = "Nazir"    
+        print ('{}\t\t{}\t{}\t{}\t{}'.format(timestamp, eth_src, eth_dst, ip_src, ip_dst))
