@@ -72,12 +72,59 @@ def learningPhase(packets, nazirIp):
 
     return sets
 
-def excludingPhase(disjointSets):
-    excludedSet = set()
-    for disjointSet in disjointSets:
-        if (isDisjoint(excludedSet ,disjointSet)):
-            excludedSet.add(disjointSet)
-    pass
+def getAllSets(packets, nazirIp):
+    sets = []
+    srcList = []
+    dstList = []
+    nazirSent = False
+    for index in range(len(packets)):
+        ip_src = packets[index].packet.payload.src.decode('UTF8')
+        ip_dst = packets[index].packet.payload.dst.decode('UTF8')
+        srcList.append(ip_src)
+        dstList.append(ip_dst)
+        if(len(srcList) == 12):
+            if (nazirSent):
+                sets.append(set(dstList))   
+                nazirSent = False
+            else:
+                for srcIp in srcList:
+                    if (srcIp == nazirIp):
+                        nazirSent = True
+                        break
+            dstList.clear()
+            srcList.clear()
+
+    return sets
+
+
+def excludingPhase(disjointSets, numberOfPartners, allSets):
+    resultingSet = list()
+   # while(len(resultingSet) < int(numberOfPartners)):
+    for index in range(len(disjointSets)):
+        for compareSet in disjointSets:
+            for s in allSets:
+                listOfSet = list()
+                listOfSet.append(s)
+                if (isDisjoint(disjointSets[index], listOfSet) == False and isDisjoint(compareSet, listOfSet)):
+                    disjointSets[index] = disjointSets[index].intersection(listOfSet[0])
+    answer = getAnswer(disjointSets)
+    print(answer)
+
+def getAnswer(disjointSets):
+    sum = 0
+    for s in disjointSets:
+        ip = s.pop()
+        splitIp = ip.split(".")
+        for index in range(len(splitIp)):
+            splitIp[index] = hex(int(splitIp[index]))[2:]
+        ipAsHex = "".join(splitIp)
+        sum += int(ipAsHex,16)
+
+    return sum
+
+
+
+
 
 if __name__ == "__main__":
     parameters = getParameters()
@@ -85,6 +132,6 @@ if __name__ == "__main__":
     mixIp = parameters['mixIp']
     numberOfPartners = parameters['nbr']
     capFile = getFile(parameters['path'])
-    packets = capFile.packets
-    disjointSets = learningPhase(packets, nazirIp)
+    disjointSets = learningPhase(list(capFile.packets), nazirIp)
+    resultingSet = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp))
     
