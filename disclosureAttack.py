@@ -111,8 +111,6 @@ def excludingPhase(disjointSets, numberOfPartners, allSets):
         
     return disjointSets
 
-
-
 def getAnswer(disjointSets):
     sum = 0
     for s in disjointSets:
@@ -134,6 +132,7 @@ def getBatchSize(packets, mixIp):
             size += 1
         elif(entered and srcIp is not mixIp): # That was all sendings from the mix. 
             break
+        
     return size
 
 if __name__ == "__main__":
