@@ -91,17 +91,27 @@ def getAllSets(packets, nazirIp, batchSize):
 
     return sets
 
+def isNoIntersectOtherwise(finalSets, s):
+    for finalSet in finalSets:
+        if(len(finalSet.intersection(s)) is not 0):
+
+            return False
+
+    return True
 
 def excludingPhase(disjointSets, numberOfPartners, allSets):
-    compareSets = list(disjointSets)
-    for index in range(len(disjointSets)):
-        for compareSet in compareSets:
-            for s in allSets:
-                if (len(disjointSets[index].intersection(s)) is not 0 and len(compareSet.intersection(s)) is 0):
-                    disjointSets[index] = disjointSets[index].intersection(s)
+    for s in allSets:
+        for index in range(len(disjointSets)):
+            compareSets = list(disjointSets)
+            compareSets.remove(disjointSets[index])
+            if(s == disjointSets[index]):
+                continue
+            if(len(s.intersection(disjointSets[index])) is not 0 and isNoIntersectOtherwise(compareSets, s)):
+                disjointSets[index] = s.intersection(disjointSets[index])
+        
+    return disjointSets
 
-    answer = getAnswer(disjointSets)
-    print("Answer:", answer)
+
 
 def getAnswer(disjointSets):
     sum = 0
@@ -135,5 +145,7 @@ if __name__ == "__main__":
     batchSize = getBatchSize(capFile.packets, mixIp)
     print("Batch size:", batchSize)
     disjointSets = learningPhase(list(capFile.packets), nazirIp, batchSize)
-    resultingSet = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp, batchSize))
+    resultingSets = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp, batchSize))
+    answer = getAnswer(resultingSets)
+    print("Answer:", answer)
     
