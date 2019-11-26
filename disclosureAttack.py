@@ -95,7 +95,6 @@ def getAllSets(packets, nazirIp, batchSize):
 def excludingPhase(disjointSets, numberOfPartners, allSets):
     resultingSet = list()
     done = False
-   # while(len(resultingSet) < int(numberOfPartners)):
     for index in range(len(disjointSets)):
         for compareSet in disjointSets:
             if (done):
@@ -110,6 +109,8 @@ def excludingPhase(disjointSets, numberOfPartners, allSets):
                         if (len(disjointSets[index]) is 1):
                             done = True
                             break
+    for s in disjointSets:
+        print("found partner:", s)
     answer = getAnswer(disjointSets)
     print("Answer:", answer)
 
@@ -145,6 +146,7 @@ if __name__ == "__main__":
     numberOfPartners = parameters['nbr']
     capFile = getFile(parameters['path'])
     batchSize = getBatchSize(capFile.packets, mixIp)
+    print("Batch size:", batchSize)
     disjointSets = learningPhase(list(capFile.packets), nazirIp, batchSize)
     resultingSet = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp, batchSize))
     
