@@ -93,24 +93,13 @@ def getAllSets(packets, nazirIp, batchSize):
 
 
 def excludingPhase(disjointSets, numberOfPartners, allSets):
-    resultingSet = list()
-    done = False
+    compareSets = list(disjointSets)
     for index in range(len(disjointSets)):
-        for compareSet in disjointSets:
-            if (done):
-                done = False
-                break
-            if (compareSet is not disjointSets[index]):
-                for s in allSets:
-                    listOfSet = list()
-                    listOfSet.append(s)
-                    if (isDisjoint(disjointSets[index], listOfSet) == False and isDisjoint(compareSet, listOfSet)):
-                        disjointSets[index] = disjointSets[index].intersection(listOfSet[0])
-                        if (len(disjointSets[index]) is 1):
-                            done = True
-                            break
-    for s in disjointSets:
-        print("found partner:", s)
+        for compareSet in compareSets:
+            for s in allSets:
+                if (len(disjointSets[index].intersection(s)) is not 0 and len(compareSet.intersection(s)) is 0):
+                    disjointSets[index] = disjointSets[index].intersection(s)
+
     answer = getAnswer(disjointSets)
     print("Answer:", answer)
 
@@ -120,10 +109,9 @@ def getAnswer(disjointSets):
         ip = s.pop()
         splitIp = ip.split(".")
         for index in range(len(splitIp)):
-            splitIp[index] = hex(int(splitIp[index]))[2:]
+            splitIp[index] = int(splitIp[index]).to_bytes(1, byteorder='big').hex()
         ipAsHex = "".join(splitIp)
-        sum += int(ipAsHex,16)
-
+        sum += int(ipAsHex, 16)
     return sum
 
 def getBatchSize(packets, mixIp):
@@ -137,7 +125,6 @@ def getBatchSize(packets, mixIp):
         elif(entered and srcIp is not mixIp): # That was all sendings from the mix. 
             break
     return size
-
 
 if __name__ == "__main__":
     parameters = getParameters()
