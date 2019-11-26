@@ -40,24 +40,19 @@ def isDisjoint(setToBeCompared, sets):
 
     return True
 
-def learningPhase(packets, nazirIp):
+def learningPhase(packets, nazirIp, batchSize):
     sets = []
     srcList = []
     dstList = []
     nazirSent = False
     for index in range(len(packets)):
-        timestamp = packets[index].timestamp
-        # all data is ASCII encoded (byte arrays). If we want to compare with strings
-        # we need to decode the byte arrays into UTF8 coded strings
-        eth_src = packets[index].packet.src.decode('UTF8')
-        eth_dst = packets[index].packet.dst.decode('UTF8')
         ip_src = packets[index].packet.payload.src.decode('UTF8')
         ip_dst = packets[index].packet.payload.dst.decode('UTF8')
         srcList.append(ip_src)
         dstList.append(ip_dst)
-        if(len(srcList) == 12):
+        if(len(srcList) == batchSize):
             if (nazirSent and isDisjoint(set(dstList), sets)): # if true => save set.
-                print("Found disjoint set:", set(dstList))
+                print("Found disjoint set!")
                 sets.append(set(dstList))   
                 nazirSent = False
             elif(nazirSent and isDisjoint(set(dstList), sets) == False):  # else if nazir sent but not disjoint => nazirSent = false
@@ -69,10 +64,10 @@ def learningPhase(packets, nazirIp):
                         break
             dstList.clear()
             srcList.clear()
-
+    print("Found sets:", len(sets))
     return sets
 
-def getAllSets(packets, nazirIp):
+def getAllSets(packets, nazirIp, batchSize):
     sets = []
     srcList = []
     dstList = []
@@ -82,7 +77,7 @@ def getAllSets(packets, nazirIp):
         ip_dst = packets[index].packet.payload.dst.decode('UTF8')
         srcList.append(ip_src)
         dstList.append(ip_dst)
-        if(len(srcList) == 12):
+        if(len(srcList) == batchSize):
             if (nazirSent):
                 sets.append(set(dstList))   
                 nazirSent = False
@@ -122,8 +117,17 @@ def getAnswer(disjointSets):
 
     return sum
 
-
-
+def getBatchSize(packets, mixIp):
+    size = 0
+    entered = False
+    for packet in packets:
+        srcIp = packet.packet.payload.src.decode("UTF8")
+        if(mixIp == srcIp): # Found the first packet mix sends
+            entered = True
+            size += 1
+        elif(entered and srcIp is not mixIp): # That was all sendings from the mix. 
+            break
+    return size
 
 
 if __name__ == "__main__":
@@ -132,6 +136,7 @@ if __name__ == "__main__":
     mixIp = parameters['mixIp']
     numberOfPartners = parameters['nbr']
     capFile = getFile(parameters['path'])
-    disjointSets = learningPhase(list(capFile.packets), nazirIp)
-    resultingSet = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp))
+    batchSize = getBatchSize(capFile.packets, mixIp)
+    disjointSets = learningPhase(list(capFile.packets), nazirIp, batchSize)
+    resultingSet = excludingPhase(disjointSets, numberOfPartners, getAllSets(list(capFile.packets), nazirIp, batchSize))
     
