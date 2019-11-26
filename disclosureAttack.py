@@ -94,14 +94,22 @@ def getAllSets(packets, nazirIp, batchSize):
 
 def excludingPhase(disjointSets, numberOfPartners, allSets):
     resultingSet = list()
+    done = False
    # while(len(resultingSet) < int(numberOfPartners)):
     for index in range(len(disjointSets)):
         for compareSet in disjointSets:
-            for s in allSets:
-                listOfSet = list()
-                listOfSet.append(s)
-                if (isDisjoint(disjointSets[index], listOfSet) == False and isDisjoint(compareSet, listOfSet)):
-                    disjointSets[index] = disjointSets[index].intersection(listOfSet[0])
+            if (done):
+                done = False
+                break
+            if (compareSet is not disjointSets[index]):
+                for s in allSets:
+                    listOfSet = list()
+                    listOfSet.append(s)
+                    if (isDisjoint(disjointSets[index], listOfSet) == False and isDisjoint(compareSet, listOfSet)):
+                        disjointSets[index] = disjointSets[index].intersection(listOfSet[0])
+                        if (len(disjointSets[index]) is 1):
+                            done = True
+                            break
     answer = getAnswer(disjointSets)
     print("Answer:", answer)
 
