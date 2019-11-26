@@ -60,9 +60,8 @@ def learningPhase(packets, nazirIp):
                 print("Found disjoint set:", set(dstList))
                 sets.append(set(dstList))   
                 nazirSent = False
-            elif(nazirIp and isDisjoint(set(dstList), sets) == False):  # else if nazir sent but not disjoint => nazirSent = false
+            elif(nazirSent and isDisjoint(set(dstList), sets) == False):  # else if nazir sent but not disjoint => nazirSent = false
                 nazirSent = False
-                continue
             else:
                 for srcIp in srcList:
                     if (srcIp == nazirIp):
@@ -71,10 +70,13 @@ def learningPhase(packets, nazirIp):
             dstList.clear()
             srcList.clear()
 
-
     return sets
 
-def excludingPhase():
+def excludingPhase(disjointSets):
+    excludedSet = set()
+    for disjointSet in disjointSets:
+        if (isDisjoint(excludedSet ,disjointSet)):
+            excludedSet.add(disjointSet)
     pass
 
 if __name__ == "__main__":
