@@ -108,7 +108,7 @@ def excludingPhase(disjointSets, numberOfPartners, allSets):
                 if (isDisjoint(disjointSets[index], listOfSet) == False and isDisjoint(compareSet, listOfSet)):
                     disjointSets[index] = disjointSets[index].intersection(listOfSet[0])
     answer = getAnswer(disjointSets)
-    print(answer)
+    print("Answer:", answer)
 
 def getAnswer(disjointSets):
     sum = 0
